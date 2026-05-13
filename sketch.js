@@ -1,6 +1,12 @@
 let port; // Keep this for your HC-05
+
 let angle = 0;
 let distance = 100;
+let curArray = [];
+for (let i = 0; i < 180; i++) {
+  curArray.push(0);
+}
+
 let sweepDir = 1;
 let sweepAngle = 30;
 let sweepSpeed = 0.5;
@@ -9,6 +15,14 @@ let maxThrottle = 100;
 let leftMotorSpeed = 100;
 let rightMotorSpeed = 100;
 let radarFrame; // Added this variable for your graphics buffer
+
+let btValueDictionary = {
+  'distance': 0,
+  'ph': 0,
+  'angle': 0,
+  'error': "",
+  'dosingData': {'message': "", 'dueTime': "", 'doseAmount': 0, 'status': ""}
+}; // To store the latest values from Bluetooth
 
 function setup() {
   createCanvas(windowWidth, 1000);
@@ -46,12 +60,6 @@ function draw() {
   } else {
     fill(0, 255, 0);
     text("Connected!", 20, 70);
-    
-    // Example: Read data coming from your project
-    let str = port.readUntil("\n");
-    if (str) {
-      console.log("Received: " + str);
-    }
   }
 
   sweepAngle += sweepSpeed * sweepDir;
@@ -68,16 +76,11 @@ function draw() {
   rightMotorSpeed = floor(lerp(rightMotorSpeed, calculateSteering()[1], 0.3));
   maxThrottle = floor(calculateSteering()[2]);
 
-  // From simulated:
-  let simulatedDist = noise(frameCount * 0.01) * 150 + 50;
-
   // To real data (if connected):
-  /*
-  let simulatedDist = distance; // Use the global distance variable
-  if (port.available() > 0) {
-    let val = port.readUntil('\n');
-    if (val) distance = float(val); // Update distance with real sonar data
-  } */
+  if (btValueDictionary['distance'] !== 'NaN' && btValueDictionary['distance'] > 0) {
+    let simulatedDist = btValueDictionary['distance']; // Use the distance from Bluetooth if available
+    curArray = sonarToArray(distance, angle);
+  }
 
   let bx = simulatedDist * cos(sweepAngle + 180);
   let by = simulatedDist * sin(sweepAngle + 180);
@@ -123,11 +126,14 @@ function draw() {
   line(50, 600, windowWidth - 50, 600);
   line(windowWidth / 2, 600, windowWidth / 2, 550)
 
-  /*if (port.opened() && frameCount % 5 === 0) {
-    let L = floor(leftMotorSpeed);
-    let R = floor(rightMotorSpeed);
+  if (port.opened() && frameCount % 5 === 0) {
+    let biases = getBias(curArray);
+    let speeds = convertBiasesToSpeeds(biases.leftBias, biases.rightBias);
+    
+    let L = floor(speeds.leftSpeed);
+    let R = floor(speeds.rightSpeed);
     port.write(`${L},${R}\n`);
-  }*/
+  }
 }
 
 // Example: Send a command when the screen is touched
@@ -141,30 +147,19 @@ function calculateSteering() {
   let leftMotor = maxThrottle;
   let rightMotor = maxThrottle;
   
-  if (mouseIsPressed) {
-    let steer = map(mouseX, 0, width, -80, 80);
-    let throttle = map(mouseY, 600, 500, 0, 100);
-    steer = constrain(steer, -80, 80);
-    throttle = constrain(throttle, 0, 100);
-    
-    if (steer > 0) {
-      leftMotor = 100;
-      rightMotor = 100 - steer;
-    } else {
-      leftMotor = 100 + steer;
-      rightMotor = 100;
-    }
-    
-    if (mouseY > 600) {
-      leftMotor = 0;
-      rightMotor = 0;
-    }
-    
-    leftMotor = constrain(leftMotor, 0, throttle);
-    rightMotor = constrain(rightMotor, 0, throttle);
-    return [leftMotor, rightMotor, throttle];
-  }
+  let biases = getBias(curArray);
+  leftMotor += biases.leftBias * maxThrottle;
+  rightMotor += biases.rightBias * maxThrottle;
+
   return [leftMotor, rightMotor, maxThrottle];
+}
+
+function sonarToArray(dist, angle) {
+  // Implementation for converting sonar data to array
+  let oldArr = curArray;
+
+  oldArr[angle] = dist; // Store distance at the index corresponding to the angle
+  return oldArr;
 }
 
 function sendMode() {
