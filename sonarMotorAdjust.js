@@ -1,7 +1,19 @@
+function sonarToArray(dist, angle) {
+  // Implementation for converting sonar data to array
+  let oldArr = curArray;
+
+  oldArr[angle] = dist; // Store distance at the index corresponding to the angle
+  return oldArr;
+}
+
 function getBias(sonarData, safeDistance = 50) {
     // Assume sonarData is an array of distances from 0 to 179 degrees
-    let leftMin = Math.min(...sonarData.slice(0, 90));
-    let rightMin = Math.min(...sonarData.slice(90, 180));
+    // Filter out 0 (errors/out of range) so they don't trigger the "blocked" logic
+    let validLeft = sonarData.slice(0, 90).filter(d => d > 0);
+    let validRight = sonarData.slice(90, 180).filter(d => d > 0);
+
+    let leftMin = validLeft.length > 0 ? Math.min(...validLeft) : 999;
+    let rightMin = validRight.length > 0 ? Math.min(...validRight) : 999;
 
     let leftBias = 0;
     let rightBias = 0;
@@ -38,4 +50,13 @@ function convertBiasesToSpeeds(leftBias, rightBias) {
     rightSpeed = Math.max(0, Math.min(150, rightSpeed));
 
     return { leftSpeed, rightSpeed };
+}
+
+function calculateSteering() {
+  let biases = getBias(curArray);
+
+  let leftMotor = biases.leftBias * maxThrottle;
+  let rightMotor = biases.rightBias * maxThrottle;
+
+  return [leftMotor, rightMotor];
 }
