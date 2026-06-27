@@ -2,7 +2,7 @@
 
 > **This project is deprecated and maintained as a proof of concept only.** Please use the new repository for the latest features and updates.
 >
-> 👉 **[New Repository](https://github.com/mr-rid-nerdy-bih/Neutra-Floater-v2)** - Latest version with active development
+> 👉 **[New Repository](https://github.com/mr-rid-nerdy-bih/NFloater-vFlutter)** - Latest version with active development
 
 ---
 
