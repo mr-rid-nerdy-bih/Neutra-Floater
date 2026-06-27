@@ -1,10 +1,16 @@
-# Neutra Floater Web App
+# ⚠️ Neutra Floater Web App [DEPRECATED]
+
+> **This project is deprecated and maintained as a proof of concept only.** Please use the new repository for the latest features and updates.
+>
+> 👉 **[New Repository](https://github.com/mr-rid-nerdy-bih/Neutra-Floater-v2)** - Latest version with active development
+
+---
 
 A GUI web application built with **p5.js** for controlling and visualizing a floating robot through Bluetooth serial communication. The app is hosted on GitHub Pages for easy accessibility.
 
 ## Overview
 
-Neutra Floater is an interactive web-based control interface that bridges communication between your mobile device and a robot via Classic Bluetooth. The graphical interface provides real-time visualization and control capabilities using p5.js, a creative coding library.
+Neutra Floater is an interactive web-based control interface that bridges communication between your mobile device and a robot via Classic Bluetooth. The graphical interface provides real-time visualization.
 
 ## Features
 
@@ -162,6 +168,6 @@ For issues, feature requests, or questions:
 
 ---
 
-**Last Updated**: May 6, 2026
+**Last Updated**: June 27, 2026
 
 Made with ❤️ for robotics enthusiasts
